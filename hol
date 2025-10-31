@@ -1,0 +1,2 @@
+    FOREIGN KEY (id_especialidad) REFERENCES Especialidades(id_especialidad)
+);
