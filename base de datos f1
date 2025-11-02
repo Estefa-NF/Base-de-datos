@@ -1,0 +1,4 @@
+selec 
+cast(salario As Decimal (10),2)) AS Salariodecimal, 
+convert( varchar, getdate(), 103 AS fechaFormato_ddmmyyyy
+from empleados;
