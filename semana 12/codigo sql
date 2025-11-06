@@ -1,0 +1,156 @@
+USE AdventureWorks2017;
+GO
+
+
+-- 1 SUBCONSULTA CON IN
+-- Muestra los nombres de los empleados que han realizado
+-- ventas mayores a 5000 dólares.
+
+SELECT p.FirstName, p.LastName
+FROM Person.Person p
+WHERE p.BusinessEntityID IN (
+    SELECT SalesPersonID
+    FROM Sales.SalesOrderHeader
+    WHERE TotalDue > 5000
+);
+-- La subconsulta busca los IDs de los vendedores con ventas mayores a 5000.
+-- La consulta principal muestra sus nombres.
+
+
+
+
+-- 2 SUBCONSULTA CON EXISTS
+-- Muestra los empleados que realizaron al menos una venta.
+
+SELECT p.FirstName, p.LastName
+FROM Person.Person p
+WHERE EXISTS (
+    SELECT 1
+    FROM Sales.SalesOrderHeader s
+    WHERE s.SalesPersonID = p.BusinessEntityID
+);
+-- EXISTS devuelve TRUE si hay al menos una fila en la subconsulta.
+-- No importa cuántos registros, solo que exista uno.
+
+
+
+
+-- 3️ SUBCONSULTA EN HAVING
+-- Muestra los vendedores cuyo promedio de ventas es mayor
+-- que el promedio general de todos los vendedores.
+
+SELECT SalesPersonID, AVG(TotalDue) AS PromedioVentas
+FROM Sales.SalesOrderHeader
+GROUP BY SalesPersonID
+HAVING AVG(TotalDue) > (
+    SELECT AVG(TotalDue)
+    FROM Sales.SalesOrderHeader
+);
+-- La subconsulta calcula el promedio general de ventas.
+-- Luego se muestran solo los vendedores que superan ese promedio.
+
+
+
+
+-- 4️ SUBCONSULTA EN SELECT
+-- Muestra cada pedido junto al promedio general de ventas.
+
+SELECT SalesOrderID, TotalDue,
+       (SELECT AVG(TotalDue)
+        FROM Sales.SalesOrderHeader) AS PromedioGeneral
+FROM Sales.SalesOrderHeader;
+
+-- En cada fila se muestra el valor TotalDue y el promedio de todas las ventas.
+
+
+
+
+-- 5️ SUBCONSULTA CON FUNCIONES DE FECHA
+-- Muestra los pedidos realizados en el mismo mes que el pedido 43659.
+
+SELECT SalesOrderID, OrderDate
+FROM Sales.SalesOrderHeader
+WHERE MONTH(OrderDate) = (
+    SELECT MONTH(OrderDate)
+    FROM Sales.SalesOrderHeader
+    WHERE SalesOrderID = 43659
+);
+
+-- La subconsulta obtiene el mes del pedido 43659.
+-- Luego, se comparan los meses de todos los pedidos con ese mismo valor.
+
+
+
+
+
+-- 6️ SUBCONSULTA CON FUNCIONES DE CADENA
+-- Muestra el nombre completo de los clientes que realizaron más de 3 pedidos.
+SELECT CONCAT(p.FirstName, ' ', p.LastName) AS NombreCompleto
+FROM Person.Person p
+WHERE p.BusinessEntityID IN (
+    SELECT CustomerID
+    FROM Sales.SalesOrderHeader
+    GROUP BY CustomerID
+    HAVING COUNT(SalesOrderID) > 3
+);
+
+-- La subconsulta agrupa por cliente y cuenta sus pedidos.
+-- Solo devuelve los IDs de clientes con más de 3 pedidos.
+
+
+
+
+
+-- 7️ SUBCONSULTA CON FUNCIONES DE CONVERSIÓN
+-- Muestra el ID del pedido, el total convertido a texto y la fecha formateada.
+SELECT SalesOrderID,
+       CAST(TotalDue AS VARCHAR(20)) AS TotalTexto,
+       CONVERT(VARCHAR, OrderDate, 103) AS FechaFormatoEuropeo
+FROM Sales.SalesOrderHeader;
+
+-- CAST convierte el monto numérico a texto.
+-- CONVERT formatea la fecha como "dd/mm/yyyy" (formato europeo).
+
+
+
+
+
+-- 8️ SUBCONSULTA COMBINADA (IN + FECHA + CADENA)
+-- Muestra los nombres de los clientes que compraron en el mismo año
+-- que el pedido con ID 43659.
+
+SELECT CONCAT(p.FirstName, ' ', p.LastName) AS Cliente
+FROM Person.Person p
+WHERE p.BusinessEntityID IN (
+    SELECT CustomerID
+    FROM Sales.SalesOrderHeader
+    WHERE YEAR(OrderDate) = (
+        SELECT YEAR(OrderDate)
+        FROM Sales.SalesOrderHeader
+        WHERE SalesOrderID = 43659
+    )
+);
+-- La subconsulta interna obtiene el año del pedido 43659.
+-- La subconsulta externa busca los clientes con compras en ese mismo año.
+-- Finalmente, se muestran sus nombres completos.
+
+
+-- Día, mes y año actual:
+SELECT DAY(GETDATE()) AS DiaActual,
+       MONTH(GETDATE()) AS MesActual,
+       YEAR(GETDATE()) AS AnioActual;
+
+-- Agregar 10 días a la fecha actual:
+SELECT DATEADD(DAY, 10, GETDATE()) AS FechaDentroDe10Dias;
+
+-- Diferencia en días desde el inicio del año:
+SELECT DATEDIFF(DAY, '2025-01-01', GETDATE()) AS DiasDesdeInicioAño;
+
+-- Ejemplo de funciones de cadena:
+SELECT UPPER(p.FirstName) AS NombreMayuscula,
+       LOWER(p.LastName) AS ApellidoMinuscula,
+       SUBSTRING(p.FirstName, 1, 3) AS PrimerasLetras,
+       LEN(p.FirstName) AS LongitudNombre
+FROM Person.Person p;
+
+-- Estas funciones sirven para manipular texto: mayúsculas, minúsculas, longitud, recorte, etc.
