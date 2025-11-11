@@ -1,0 +1,8 @@
+declare @Nombrevar NVARCHAR(50);
+declare @Edadvar INT;
+
+sed @nombrevar ='Ejemplo usuario';
+sed @edadvar =28;
+
+selec @nombrevar AS nombre, @Edadvar AS Edad;
+go
