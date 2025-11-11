@@ -1,0 +1,2 @@
+declare @nombre nvarchar(50);
+declare @apellido nvarchar (50); 
