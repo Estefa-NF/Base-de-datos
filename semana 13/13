@@ -1,0 +1,117 @@
+USE AdventureWorks2017;
+GO
+
+
+
+   --1. FUNCIÓN: Calcular el área de un círculo
+   --Las funciones en T-SQL devuelven un valor calculado. En este ejemplo, calculamos el área de un círculo (π * r²).
+
+CREATE FUNCTION dbo.CalcularAreaCirculo (@Radio FLOAT)
+RETURNS FLOAT
+AS
+BEGIN
+    DECLARE @Area FLOAT;                     -- Variable para guardar el resultado
+    SET @Area = PI() * @Radio * @Radio;      -- Fórmula del área del círculo
+    RETURN @Area;                            -- Devolvemos el valor
+END;
+GO
+
+-- Prueba de la función
+SELECT dbo.CalcularAreaCirculo(5) AS Area;   -- Resultado esperado: ~78.54
+GO
+
+
+
+
+   -- 2. PROCEDIMIENTO ALMACENADO: Insertar empleado
+  -- Los procedimientos almacenados ejecutan un conjunto de instrucciones.A diferencia de las funciones, no devuelven un valor directo.
+   -- AdventureWorks no permite insertar en tablas del sistema, por eso usaremos una tabla temporal #Empleados solo para pruebas.
+   
+CREATE TABLE #Empleados (
+    Nombre NVARCHAR(50),
+    Edad INT,
+    Departamento NVARCHAR(50)
+);
+
+CREATE PROCEDURE dbo.InsertarEmpleado
+    @Nombre NVARCHAR(50),
+    @Edad INT,
+    @Departamento NVARCHAR(50)
+AS
+BEGIN
+    INSERT INTO #Empleados (Nombre, Edad, Departamento)
+    VALUES (@Nombre, @Edad, @Departamento);
+END;
+GO
+
+EXEC dbo.InsertarEmpleado 'Juan Pérez', 30, 'Ventas';
+EXEC dbo.InsertarEmpleado 'Ana Gómez', 25, 'Marketing';
+
+SELECT * FROM #Empleados;
+GO
+
+
+
+
+   -- 3. VARIABLES EN T-SQL
+  
+  -- Las variables se usan para almacenar datos temporales.Se pueden asignar con SET o en una sola línea al declararlas.
+
+DECLARE @Nombre NVARCHAR(50);   -- Declaramos variable texto
+DECLARE @Edad INT;              -- Declaramos variable numérica
+
+SET @Nombre = 'Carlos Díaz';    -- Asignamos valores
+SET @Edad = 32;
+
+-- Mostramos el contenido de las variables
+SELECT @Nombre AS Nombre, @Edad AS Edad;
+GO
+
+
+
+
+   --4. CONDICIONAL IF
+   
+   -- Permite ejecutar bloques de código dependiendo de una condición.
+   
+
+DECLARE @EdadPersona INT;
+SET @EdadPersona = 17;  -- Cambia el valor para probar
+
+IF @EdadPersona >= 18
+    PRINT 'La persona es adulta.';
+ELSE
+    PRINT 'La persona es menor de edad.';
+GO
+
+
+
+
+  -- 5. CURSOR: Recorrer registros de forma secuencial
+  --Los cursores permiten recorrer fila por fila una consulta SELECT.
+  
+DECLARE @Nombre NVARCHAR(50);
+DECLARE @Apellido NVARCHAR(50);
+
+-- Definimos el cursor (solo 5 registros para ejemplo)
+DECLARE persona_cursor CURSOR FOR
+SELECT TOP 5 FirstName, LastName
+FROM Person.Person;
+
+-- el cursor
+OPEN persona_cursor;
+
+-- Obtenemos la primera fila
+FETCH NEXT FROM persona_cursor INTO @Nombre, @Apellido;
+
+-- Recorremos las filas
+WHILE @@FETCH_STATUS = 0
+BEGIN
+    PRINT 'Nombre: ' + @Nombre + ' ' + @Apellido;
+    FETCH NEXT FROM persona_cursor INTO @Nombre, @Apellido;
+END;
+
+-- Cerramos y liberamos el cursor
+CLOSE persona_cursor;
+DEALLOCATE persona_cursor;
+GO
