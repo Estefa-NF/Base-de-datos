@@ -1,0 +1,5 @@
+print 
+begin transaccion 
+update dbo.cuentas
+set saldo =saldo -100
+where id=1
